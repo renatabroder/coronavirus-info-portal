@@ -51,13 +51,14 @@
 
       <jv-country-info *ngIf= "visualizacaoInfo == 'pais'"
                     [countryInfo]="local"
-                    [isFavorite]="isCurrentFavorite$ | async"
+                    [isFavorite]="listaFavoritos[ local.country ]"
                     (toggleBookmark)="onToggleBookmark(local)"></jv-country-info>
 
       <jv-local-info *ngIf= "visualizacaoInfo == 'estado'"
                     [localInfo]="local"
-                    [isFavorite]="isCurrentFavorite$ | async"
+                    [isFavorite]="listaFavoritos[ local.uf | uppercase ]"
                     (toggleBookmark)="onToggleBookmark(local)"></jv-local-info>
+      
     </div>
 
     <div class="d-flex justify-content-center mr-5">

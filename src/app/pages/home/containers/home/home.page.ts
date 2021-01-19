@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 import { Store, select } from '@ngrx/store';
 import { Observable, Subject, combineLatest } from 'rxjs';
@@ -8,9 +9,7 @@ import { takeUntil, map } from 'rxjs/operators';
 import { Bookmark } from 'src/app/shared/models/bookmark.model';
 import * as fromHomeActions from '../../state/home.actions';
 import * as fromHomeSelectors from '../../state/home.selectors';
-// import * as fromBookmarksSelectors from '../../../bookmarks/state/bookmarks.selectors';
-import * as fromRouterSelectors from '../../../../shared/state/router/router.selector'; 
-import { ActivatedRoute } from '@angular/router';
+import * as fromBookmarksSelectors from '../../../bookmarks/state/bookmarks.selectors';
 
 @Component({
   selector: 'jv-home',
@@ -24,10 +23,13 @@ export class HomePage implements OnInit, OnDestroy {
   localInfo$: Observable<any>;
   bookmarksList$: Observable<Bookmark[]>;
   isCurrentFavorite$: Observable<boolean>;
+  
+  listaLocais: any = [];
+  listaFavoritos: any = {};
 
   private componentDestroyed$ = new Subject();
 
-  localInfo: any;
+  localInfo: any = [];
   loading$: Observable<boolean>;
   error$: Observable<boolean>;
 
@@ -39,21 +41,38 @@ export class HomePage implements OnInit, OnDestroy {
 
   constructor(private store: Store, private fb: FormBuilder, private route: ActivatedRoute) { }
 
-  beginPagination(pagedItems: Array<any>) {  
-    this.pagedItems = pagedItems;  
-  }
+  // Para paginação 
+  beginPagination(pagedItems: Array<any>) { this.pagedItems = pagedItems; }
   
+  // Retorna o tipo para html
   get tipo() { return this.searchForm.get('searchTypeControl').value; }
 
+  // Executa no início do carregamento
   ngOnInit(): void {
   
+    // this.route.queryParams.subscribe(params => {
+    //   if(params['tipo'] && params['stringBusca']){
+    //     console.log("pre")
+    //     this.store.dispatch(fromHomeActions.carregaRedirecionada())
+    //   }
+    // });
+    
     this.criarFormulario();
     
     this.store.pipe(
                 select(fromHomeSelectors.selecionaEstadoAtual),
                 takeUntil(this.componentDestroyed$)
                )
-              .subscribe(value => {this.recebeInfos(value)});
+              .subscribe(value => {
+                if(value){
+                  
+                  this.localInfo = (value?.data ? (value.data.country? [value.data] : value.data) : [value])
+                  if(!this.localInfo[0] || this.localInfo[0]?.error) this.localInfo = undefined;
+                  if(!this.localInfo && this.count > 0) this.erroInfo = true;
+                  
+                  this.favs()
+                }
+              });
     this.loading$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualLoading));
     this.error$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualErro));
 
@@ -67,37 +86,16 @@ export class HomePage implements OnInit, OnDestroy {
         this.pesquisar()
       }
     });
-    
-    
-    // // Pensar na lógica para mostrar o Adicionar/Remover favoritos
-
-    // this.localInfo$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtual));
-    //  this.localInfo$
-    //    .pipe(takeUntil(this.componentDestroyed$))
-    //    .subscribe(value => this.localInfo = value);
-    //  this.loading$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualLoading));
-    //  this.error$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualErro));
-
-    // this.bookmarksList$ = this.store.pipe(select(fromBookmarksSelectors.selectBookmarksList));
-
-    // this.isCurrentFavorite$ = combineLatest([this.localInfo$, this.bookmarksList$])
-    // .pipe(
-    //   map(([current, bookmarksList]) => {
-    //     if (!!current) {
-    //       return bookmarksList.some(bookmark => bookmark.stringBusca === current.stringBusca);
-    //     }
-    //     return false;
-    //   }),
-    // );
-
   }
 
+  // Limpa o estado da página
   ngOnDestroy(): void {
     this.componentDestroyed$.next();
     this.componentDestroyed$.unsubscribe();
     this.store.dispatch(fromHomeActions.limpaPaginaInicial());
   }
 
+  // Formulário para receber
   criarFormulario(): void {
     this.searchForm = this.fb.group({
       searchControl: ['', [Validators.required]],
@@ -105,45 +103,27 @@ export class HomePage implements OnInit, OnDestroy {
     })
   }
 
+  // Reseta as variáveis
   resetVariaveis(): void {
     this.erroInfo = false;
     this.localInfo = undefined
   }
 
+  // Pesquisar ao clique do botão ou redirecionamento
   pesquisar(): void {
     this.resetVariaveis()
 
     this.visualizacaoInfo = this.searchForm.controls['searchTypeControl'].value
     this.count++;
 
+    // alterando a url de chamada à API a depender das entradas
     let url = this.searchForm.controls['searchControl'].value
-
-    let query = ""
-    if(this.visualizacaoInfo == 'estado') {
-      query = url ? `/brazil/uf/${url}` : '';
-    } else {
-      query = url ? `/${url}` : '/countries';
-    }
+    let query = this.visualizacaoInfo == 'estado' ? (url ? `/brazil/uf/${url}` : '') : (url ? `/${url}` : '/countries');
 
     this.store.dispatch(fromHomeActions.carregaAtualizacao({ query }))
   }
 
-  recebeInfos(infos): void {
-    // Como as informações que vêm da API não são padronizadas,
-    // é necessário fazer esta checagem para armazenar corretamente
-    
-    try {
-      if(infos.error) this.localInfo = undefined;
-      else if(infos.uid) this.localInfo = [infos];
-      else if(infos.data.country) this.localInfo = [infos.data]
-      else if(infos.data[0].uid || infos.data[0].country) this.localInfo = infos.data; 
-      else this.localInfo = undefined;  
-    } catch (error) {}   
-    
-    if(!this.localInfo && this.count > 0) this.erroInfo = true;
-    //console.log(this.localInfo)
-  }
-
+  // Adicionar/Remover dos favoritos
   onToggleBookmark(local: any){
     const bookmark = new Bookmark();
     bookmark.tipo = this.visualizacaoInfo;
@@ -154,4 +134,43 @@ export class HomePage implements OnInit, OnDestroy {
     this.store.dispatch(fromHomeActions.toggleBookmark({ entity: bookmark }))
   }
 
+  // Verificar se os elementos buscados estão na lista de favoritos
+  favs(): void {
+    this.localInfo$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtual));
+    this.localInfo$
+      .pipe(takeUntil(this.componentDestroyed$))
+      .subscribe(value => {
+        this.listaLocais = value?.data ? (value.data.country? [value.data] : value.data) : [value]
+      });
+    this.loading$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualLoading));
+    this.error$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualErro));
+
+    this.bookmarksList$ = this.store.pipe(select(fromBookmarksSelectors.selectBookmarksList));
+
+    this.isCurrentFavorite$ = combineLatest([this.localInfo$, this.bookmarksList$])
+      .pipe(
+        map(([current, bookmarksList]) => {
+          if (!!current) {
+            let lista = current?.data ? (current.data.country? [current.data] : current.data) : [current]
+            let key = lista[0]?.uf ? 'uf' : 'country';
+            
+            try{
+              lista.forEach(e => {
+                this.listaFavoritos[e[key]] = bookmarksList.some(bookmark => bookmark.stringBusca === (e[key]));
+              });
+            } catch(err) { return false }
+            
+            return this.listaFavoritos;
+          }
+          return false;
+        }),
+      );
+
+    let x = this.isCurrentFavorite$.subscribe({
+        next(position) { this.listaFavoritos = position },
+        error(msg) { console.log('Error: ', msg) }
+      });
+
+  }
+    
 }

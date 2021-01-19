@@ -8,6 +8,7 @@ export class HomeGuard implements CanActivate {
   }
 
   canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean | UrlTree {
+    
     if (route.queryParams.stringBusca && route.queryParams.tipo) {
       return true;
     }

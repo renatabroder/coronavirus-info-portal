@@ -5,6 +5,11 @@ export const limpaPaginaInicial = createAction(
     '[Home] Limpa tela inicial'
 );
 
+export const carregaRedirecionada = createAction(
+    '[Home] Carrega Atualizacao Redirecionada',
+    //props<{ query: string }>(),
+); // ação criada quando botão pesquisar é clicado
+
 export const carregaAtualizacao = createAction(
     '[Home] Carrega Atualizacao',
     props<{ query: string }>(),

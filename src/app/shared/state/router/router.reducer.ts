@@ -1,4 +1,5 @@
 import { Params, RouterStateSnapshot } from '@angular/router';
+
 import { RouterStateSerializer } from '@ngrx/router-store';
 
 export interface RouterState {
@@ -24,6 +25,7 @@ export class CustomRouterSerializer implements RouterStateSerializer<RouterState
       }
       route = route.firstChild;
     } while (!!route);
+    //console.log(url)
 
     return { url, params, queryParams, fragment };
   }
