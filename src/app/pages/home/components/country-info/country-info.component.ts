@@ -7,9 +7,9 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
   changeDetection: ChangeDetectionStrategy.OnPush, //apenas será atualizado quando houver mudanças
 })
 export class CountryInfoComponent {
-
   
   @Input() countryInfo: any; 
+  @Input() isFavorite: boolean;
   @Output() toggleBookmark = new EventEmitter;
 
   onToggleBookmark(){

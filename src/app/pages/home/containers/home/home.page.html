@@ -6,59 +6,64 @@
       
       <div class="form-group">
         <label>Localidade</label>
+
         <div class="mb-2">
-          <input class="form-control" formControlName="searchControl">
+          <div class="input-group">
+
+            <!-- seleção de tipo de localidade -->
+            <div class="input-group-prepend" id="button-addon3">
+
+              <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <label class="btn btn-secondary" [class.active]="tipo == 'pais'">
+                  <input type="radio" name="searchTypeControl" id="pais" value="pais" formControlName="searchTypeControl">País
+                </label>
+
+                <label class="btn btn-secondary" [class.active]="tipo == 'estado'">
+                  <input type="radio" name="searchTypeControl" id="estado" value="estado" formControlName="searchTypeControl" checked>Estado
+                </label>
+              </div>
+
+            </div>
+
+            <!-- caixa de texto -->
+            <input type="text" class="form-control" placeholder="" formControlName="searchControl" aria-describedby="button-addon3">
+          </div>
+
+          <!-- botão pesquisar -->
           <button class="btn btn-dark"
                 (click)="pesquisar()">Pesquisar</button>
                 <!-- [disabled]="!searchForm.valid" -->
+
         </div>
 
-        <div class="form-group ">
-          <div class="btn-group btn-group-toggle" data-toggle="buttons">
-            <label class="btn btn-secondary">
-              <input type="radio" name="searchTypeControl" id="pais" value="pais" autocomplete="off" formControlName="searchTypeControl">País
-            </label>
-            <label class="btn btn-secondary">
-              <input type="radio" name="searchTypeControl" id="estado" value="estado" autocomplete="off" formControlName="searchTypeControl" checked>Estado
-            </label>
-          </div>
-        </div>
       </div>
 
     </div>
-
-    <!-- <div class="form-group md-col-2 mt-4">
-      
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="searchTypeControl" id="pais" value="pais" formControlName="searchTypeControl">
-        <label class="form-check-label" for="pais">País</label>
-      </div>
-      <div class="form-check">
-        <input class="form-check-input" type="radio" name="searchTypeControl" id="estado" value="estado" formControlName="searchTypeControl">
-        <label class="form-check-label" for="estado">Estado</label>
-      </div> 
-
-    </div> -->
-
-    <!-- <div class="form-group">
-      <label>Pesquisar com <i>autocomplete</i></label>
-    </div> -->
 
   </form>    
 
   <jv-loader *ngIf="loading$ | async"></jv-loader>
 
-  <div *ngIf="!(loading$ | async) && !(error$ | async) && !!(localInfo)">
-    <div *ngFor="let local of localInfo">
+  <div *ngIf="!(loading$ | async) && !(error$ | async) && !!(localInfo)"
+       class="p-3">
+    <div *ngFor="let local of pagedItems"
+         class="mb-3 mr-5">
 
       <jv-country-info *ngIf= "visualizacaoInfo == 'pais'"
                     [countryInfo]="local"
-                    (toggleBookmark)="onToggleBookmark()"></jv-country-info>
+                    [isFavorite]="isCurrentFavorite$ | async"
+                    (toggleBookmark)="onToggleBookmark(local)"></jv-country-info>
 
       <jv-local-info *ngIf= "visualizacaoInfo == 'estado'"
                     [localInfo]="local"
-                    (toggleBookmark)="onToggleBookmark()"></jv-local-info>
+                    [isFavorite]="isCurrentFavorite$ | async"
+                    (toggleBookmark)="onToggleBookmark(local)"></jv-local-info>
     </div>
+
+    <div class="d-flex justify-content-center mr-5">
+      <jw-pagination [items]="localInfo" (changePage)="beginPagination($event)"></jw-pagination> 
+    </div>
+
   </div>
 
   <div *ngIf="!(loading$ | async) && !(error$ | async) && erroInfo">

@@ -1,1 +1,35 @@
-<p>bookmarks works!</p>
+<div class="container-fluid">
+    <div class="bookmarks-container">
+  
+      <div>
+        <h3>Favoritos</h3>
+  
+        <div class="p-4">
+        
+          <div *ngIf="!(bookmarks$ | async).length" >Nenhum favorito adicionado</div>
+    
+          <ul class="list-unstyled">
+            <li *ngFor="let bookmark of bookmarks$ | async" class="row mb-2">
+              <a [routerLink]="['']" [queryParams]="{stringBusca: bookmark.stringBusca, tipo: bookmark.tipo}"
+                class="col-md-5">
+                {{ bookmark.stringExibic }}
+              </a>
+              <!-- <a [routerLink]="['../details']"
+                [queryParams]="{lat: bookmark.coord.lat, lon: bookmark.coord.lon}">
+                {{ bookmark.name }}
+              </a> -->
+              <button class="btn btn-outline-dark btn-sm col-md-1"
+                      (click)="removeBookmark(bookmark.stringBusca)">X</button>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+  
+      <!-- <div>
+        <label>Adicionar cidade aos favoritos</label>
+        <jv-cities-typeahead [formControl]="searchTypeaheadControl"></jv-cities-typeahead>
+      </div> -->
+  
+    </div>
+  </div>

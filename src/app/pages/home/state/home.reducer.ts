@@ -17,6 +17,7 @@ export const homeInitialState: HomeState = {
 
 const reducer = createReducer(
     homeInitialState,
+    on(fromHomeActions.limpaPaginaInicial, () => homeInitialState),
     on(fromHomeActions.carregaAtualizacao, (state) => ({
         ...state,
         loading: true,

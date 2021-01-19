@@ -8,7 +8,8 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from 
 })
 export class LocalInfoComponent {
 
-  @Input() localInfo: any; 
+  @Input() localInfo: any;
+  @Input() isFavorite: boolean;
   @Output() toggleBookmark = new EventEmitter;
 
   get nomeLocal(): string {
