@@ -19,6 +19,7 @@ import * as fromBookmarksSelectors from '../../../bookmarks/state/bookmarks.sele
 export class HomePage implements OnInit, OnDestroy {
 
   searchForm: FormGroup;
+  estado: string;
 
   localInfo$: Observable<any>;
   bookmarksList$: Observable<Bookmark[]>;
@@ -49,14 +50,7 @@ export class HomePage implements OnInit, OnDestroy {
 
   // Executa no início do carregamento
   ngOnInit(): void {
-  
-    // this.route.queryParams.subscribe(params => {
-    //   if(params['tipo'] && params['stringBusca']){
-    //     console.log("pre")
-    //     this.store.dispatch(fromHomeActions.carregaRedirecionada())
-    //   }
-    // });
-    
+      
     this.criarFormulario();
     
     this.store.pipe(
@@ -77,6 +71,7 @@ export class HomePage implements OnInit, OnDestroy {
     this.error$ = this.store.pipe(select(fromHomeSelectors.selecionaEstadoAtualErro));
 
     // Pesquisa redirecionada
+    
     this.route.queryParams.subscribe(params => {
       if(params['tipo'] && params['stringBusca']){
         this.searchForm.controls['searchTypeControl'].setValue(params['tipo']);
@@ -121,6 +116,10 @@ export class HomePage implements OnInit, OnDestroy {
     let query = this.visualizacaoInfo == 'estado' ? (url ? `/brazil/uf/${url}` : '') : (url ? `/${url}` : '/countries');
 
     this.store.dispatch(fromHomeActions.carregaAtualizacao({ query }))
+  }
+
+  onSelect(estado){
+    this.searchForm.controls['searchControl'].setValue(estado);
   }
 
   // Adicionar/Remover dos favoritos

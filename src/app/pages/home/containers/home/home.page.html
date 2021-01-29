@@ -14,28 +14,54 @@
             <div class="input-group-prepend" id="button-addon3">
 
               <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                <label class="btn btn-secondary" [class.active]="tipo == 'pais'">
-                  <input type="radio" name="searchTypeControl" id="pais" value="pais" formControlName="searchTypeControl">País
+                
+                <label class="btn btn-secondary"
+                       [class.active]="tipo == 'pais'">
+                  <input type="radio"
+                         name="searchTypeControl"
+                         id="pais"
+                         value="pais"
+                         formControlName="searchTypeControl">
+                    País
                 </label>
 
-                <label class="btn btn-secondary" [class.active]="tipo == 'estado'">
-                  <input type="radio" name="searchTypeControl" id="estado" value="estado" formControlName="searchTypeControl" checked>Estado
+                <label class="btn btn-secondary"
+                       [class.active]="tipo == 'estado'">
+                  <input type="radio"
+                         name="searchTypeControl"
+                         id="estado"
+                         value="estado"
+                         formControlName="searchTypeControl"
+                         checked>
+                    Estado
                 </label>
               </div>
 
             </div>
 
             <!-- caixa de texto -->
-            <input type="text" class="form-control" placeholder="" formControlName="searchControl" aria-describedby="button-addon3">
+            <input type="text"
+                   *ngIf= "tipo == 'pais'"
+                   class="form-control"
+                   placeholder="Digite o país"
+                   formControlName="searchControl"
+                   aria-describedby="button-addon3">
+
+            <!-- select estados -->
+            <jv-estados-combo
+              *ngIf= "tipo == 'estado'"
+              class="form-control"
+              (select)="onSelect($event)">
+            </jv-estados-combo>
+
           </div>
 
           <!-- botão pesquisar -->
           <button class="btn btn-dark"
                 (click)="pesquisar()">Pesquisar</button>
-                <!-- [disabled]="!searchForm.valid" -->
 
         </div>
-
+        
       </div>
 
     </div>

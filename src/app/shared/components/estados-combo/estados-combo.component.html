@@ -1,0 +1,9 @@
+<select [(ngModel)]="estadoSelecionado"
+        class="form-control"
+        (ngModelChange)="selecionaEstado()">
+
+    <option *ngFor="let e of comboEstados"
+            [value]="e.sigla">
+        {{e.nome}}
+    </option>
+</select>
